@@ -6,15 +6,15 @@ function pringUsage() {
     echo "options:"
     echo "    -v (--version)"
     echo "        version of the balletina distribution"
+    echo "    -p (--path)"
+    echo "        path of the ballerina distributions"
     echo "    -d (--dist)"
     echo "        balletina distribution type either of the followings"
-    echo "        1. balletina-platform"
+    echo "        If not specified both distributions will be built"
+    echo "        1. ballerina-platform"
     echo "        2. ballerina-runtime"
-    echo "    --all"
-    echo "        build all ballerina distributions"
-    echo "        this will OVERRIDE the -d option"
-    echo "eg: build.sh -v 1.0.0 -d balletina"
-    echo "eg: build.sh -v 1.0.0 --all"
+    echo "eg: build.sh -v 1.0.0 -p /home/username/Packs"
+    echo "eg: build.sh -v 1.0.0 -d ballerina-platform"
 }
 
 BUILD_ALL_DISTRIBUTIONS=false
@@ -26,6 +26,11 @@ key="$1"
 case $key in
     -v|--version)
     BALLERINA_VERSION="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--path)
+    DIST_PATH="$2"
     shift # past argument
     shift # past value
     ;;
@@ -41,12 +46,12 @@ case $key in
 esac
 done
 
-for i in "${POSITIONAL[@]}"
-do
-    if [ "$i" == "--all" ]; then
-        BUILD_ALL_DISTRIBUTIONS=true
-    fi
-done
+#for i in "${POSITIONAL[@]}"
+#do
+#    if [ "$i" == "--all" ]; then
+#        BUILD_ALL_DISTRIBUTIONS=true
+#    fi
+#done
 
 if [ -z "$BALLERINA_VERSION" ]; then
     echo "Please enter the version of the ballerina pack"
@@ -54,14 +59,23 @@ if [ -z "$BALLERINA_VERSION" ]; then
     exit 1
 fi
 
-if [ -z "$DISTRIBUTION" ] && [ "$BUILD_ALL_DISTRIBUTIONS" == "false" ]; then
-    echo "You have to use either --all or -d [distribution]"
+if [ -z "$DIST_PATH" ]; then
+    echo "Please enter the path of the ballerina packs"
     pringUsage
     exit 1
 fi
 
+if [ -z "$DISTRIBUTION" ]; then
+    BUILD_ALL_DISTRIBUTIONS=true
+    #echo "You have to use either --all or -d [distribution]"
+    #pringUsage
+    #exit 1
+fi
 
-BALLERINA_DISTRIBUTION_LOCATION=/home/ubuntu/Packs
+
+
+
+BALLERINA_DISTRIBUTION_LOCATION=$DIST_PATH
 BALLERINA_PLATFORM=ballerina-platform-linux-$BALLERINA_VERSION
 BALLERINA_RUNTIME=ballerina-runtime-linux-$BALLERINA_VERSION
 BALLERINA_INSTALL_DIRECTORY=ballerina-$BALLERINA_VERSION
