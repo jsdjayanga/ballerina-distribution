@@ -2,19 +2,19 @@
 
 function printUsage() {
     echo "Usage:"
-    echo "build.sh [options]"
+    echo "$0 [options]"
     echo "options:"
     echo "    -v (--version)"
     echo "        version of the ballerina distribution"
+    echo "    -p (--path)"
+    echo "        path of the ballerina distributions"
     echo "    -d (--dist)"
     echo "        ballerina distribution type either of the followings"
+    echo "        If not specified both distributions will be built"
     echo "        1. ballerina-platform"
     echo "        2. ballerina-runtime"
-    echo "    --all"
-    echo "        build all ballerina distributions"
-    echo "        this will OVERRIDE the -d option"
-    echo "eg: $0 -v 1.0.0 -d ballerina-platform"
-    echo "eg: $0 -v 1.0.0 --all"
+    echo "eg: $0 -v 1.0.0 -p /home/username/Packs"
+    echo "eg: $0 -v 1.0.0 -p /home/username/Packs -d ballerina-platform"
 }
 
 BUILD_ALL_DISTRIBUTIONS=false
@@ -23,9 +23,14 @@ while [[ $# -gt 0 ]]
 do
 key="$1"
 
-case $key in
+case ${key} in
     -v|--version)
     BALLERINA_VERSION="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--path)
+    DIST_PATH="$2"
     shift # past argument
     shift # past value
     ;;
@@ -41,29 +46,28 @@ case $key in
 esac
 done
 
-for i in "${POSITIONAL[@]}"
-do
-    if [ "$i" == "--all" ]; then
-        BUILD_ALL_DISTRIBUTIONS=true
-    fi
-done
-
 if [ -z "$BALLERINA_VERSION" ]; then
     echo "Please enter the version of the ballerina pack"
     printUsage
     exit 1
 fi
 
-if [ -z "$DISTRIBUTION" ] && [ "$BUILD_ALL_DISTRIBUTIONS" == "false" ]; then
-    echo "You have to use either --all or -d [distribution]"
+if [ -z "$DIST_PATH" ]; then
+    echo "Please enter the path of the ballerina packs"
     printUsage
     exit 1
 fi
 
-BALLERINA_DISTRIBUTION_LOCATION=/Users/jayanga/Documents/Ballerina-12APR2018
-BALLERINA_PLATFORM=ballerina-platform-macos-$BALLERINA_VERSION
-BALLERINA_RUNTIME=ballerina-runtime-macos-$BALLERINA_VERSION
-BALLERINA_INSTALL_DIRECTORY=ballerina-$BALLERINA_VERSION
+if [ -z "$DISTRIBUTION" ]; then
+    BUILD_ALL_DISTRIBUTIONS=true
+fi
+
+BALLERINA_DISTRIBUTION_LOCATION=${DIST_PATH}
+BALLERINA_PLATFORM=ballerina-platform-macos-${BALLERINA_VERSION}
+BALLERINA_RUNTIME=ballerina-runtime-macos-${BALLERINA_VERSION}
+BALLERINA_INSTALL_DIRECTORY=ballerina-${BALLERINA_VERSION}
+
+echo "Build started at" $(date +"%Y-%m-%d %H:%M:%S")
 
 function deleteTargetDirectory() {
     echo "Deleting target directory"
@@ -75,17 +79,17 @@ function extractPack() {
     rm -rf target/original
     mkdir -p target/original
     unzip $1 -d target/original > /dev/null 2>&1
-    mv target/original/$2 target/original/$BALLERINA_INSTALL_DIRECTORY
+    mv target/original/$2 target/original/${BALLERINA_INSTALL_DIRECTORY}
 }
 
 function createPackInstallationDirectory() {
     rm -rf target/darwin
     cp -r darwin target/darwin
 
-    sed -i -e 's/__BALLERINA_VERSION__/'$BALLERINA_VERSION'/g' target/darwin/scripts/postinstall
+    sed -i -e 's/__BALLERINA_VERSION__/'${BALLERINA_VERSION}'/g' target/darwin/scripts/postinstall
     chmod -R 755 target/darwin/scripts/postinstall
 
-    sed -i -e 's/__BALLERINA_VERSION__/'$BALLERINA_VERSION'/g' target/darwin/Distribution
+    sed -i -e 's/__BALLERINA_VERSION__/'${BALLERINA_VERSION}'/g' target/darwin/Distribution
     chmod -R 755 target/darwin/Distribution
 
     rm -rf target/darwinpkg
@@ -101,7 +105,7 @@ function createPackInstallationDirectory() {
     mkdir -p target/darwinpkg/Library/Ballerina
     chmod -R 755 target/darwinpkg/Library/Ballerina
 
-    mv target/original/$BALLERINA_INSTALL_DIRECTORY target/darwinpkg/Library/Ballerina/
+    mv target/original/${BALLERINA_INSTALL_DIRECTORY} target/darwinpkg/Library/Ballerina/
 
     rm -rf target/package
     mkdir -p target/package
@@ -112,8 +116,8 @@ function createPackInstallationDirectory() {
 }
 
 function buildPackage() {
-    pkgbuild --identifier org.ballerina.$BALLERINA_VERSION \
-    --version $BALLERINA_VERSION \
+    pkgbuild --identifier org.ballerina.${BALLERINA_VERSION} \
+    --version ${BALLERINA_VERSION} \
     --scripts target/darwin/scripts \
     --root target/darwinpkg \
     target/package/ballerina.pkg > /dev/null 2>&1
@@ -128,25 +132,19 @@ function buildProduct() {
 
 function createBallerinaPlatform() {
     echo "Creating ballerina platform installer"
-    extractPack "$BALLERINA_DISTRIBUTION_LOCATION/$BALLERINA_PLATFORM.zip" $BALLERINA_PLATFORM
+    extractPack "$BALLERINA_DISTRIBUTION_LOCATION/$BALLERINA_PLATFORM.zip" ${BALLERINA_PLATFORM}
     createPackInstallationDirectory
     buildPackage
-    buildProduct ballerina-platform-macos-installer-x64-$BALLERINA_VERSION.pkg
-    #mv target/$BALLERINA_INSTALL_DIRECTORY target/ballerina-platform-linux-installer-x64-$BALLERINA_VERSION
-    #dpkg-deb --build target/ballerina-platform-linux-installer-x64-$BALLERINA_VERSION
+    buildProduct ballerina-platform-macos-installer-x64-${BALLERINA_VERSION}.pkg
 }
 
 function createBallerinaRuntime() {
     echo "Creating ballerina runtime installer"
-    extractPack "$BALLERINA_DISTRIBUTION_LOCATION/$BALLERINA_RUNTIME.zip" $BALLERINA_RUNTIME
+    extractPack "$BALLERINA_DISTRIBUTION_LOCATION/$BALLERINA_RUNTIME.zip" ${BALLERINA_RUNTIME}
     createPackInstallationDirectory
     buildPackage
-    buildProduct ballerina-runtime-macos-installer-x64-$BALLERINA_VERSION.pkg
-    #mv target/$BALLERINA_INSTALL_DIRECTORY target/ballerina-runtime-linux-installer-x64-$BALLERINA_VERSION
-    #dpkg-deb --build target/ballerina-runtime-linux-installer-x64-$BALLERINA_VERSION
+    buildProduct ballerina-runtime-macos-installer-x64-${BALLERINA_VERSION}.pkg
 }
-
-echo "Build started at" $(date +"%Y-%m-%d %H:%M:%S")
 
 deleteTargetDirectory
 
