@@ -48,13 +48,13 @@ done
 
 if [ -z "$BALLERINA_VERSION" ]; then
     echo "Please enter the version of the ballerina pack"
-    pringUsage
+    printUsage
     exit 1
 fi
 
 if [ -z "$DIST_PATH" ]; then
     echo "Please enter the path of the ballerina packs"
-    pringUsage
+    printUsage
     exit 1
 fi
 
