@@ -1,0 +1,8 @@
+#!/bin/bash
+BALLERINAROOT=/Library/Ballerina/ballerina-__BALLERINA_VERSION__
+echo "Fixing permissions"
+cd BALLERINAROOT
+find . -exec chmod ugo+r \{\} \;
+find bin -exec chmod ugo+rx \{\} \;
+find . -type d -exec chmod ugo+rx \{\} \;
+chmod o-w .
