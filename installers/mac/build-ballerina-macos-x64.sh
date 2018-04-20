@@ -130,12 +130,24 @@ function buildProduct() {
     target/pkg/$1 > /dev/null 2>&1
 }
 
+function signProduct() {
+    mkdir -p target/pkg-signed
+    chmod -R 755 target/pkg-signed
+
+    productsign --sign "Developer ID Installer: WSO2, Inc. (QH8DVR4443)" \
+    target/pkg/$1 \
+    target/pkg-signed/$1
+
+    pkgutil --check-signature target/pkg-signed/$1
+}
+
 function createBallerinaPlatform() {
     echo "Creating ballerina platform installer"
     extractPack "$BALLERINA_DISTRIBUTION_LOCATION/$BALLERINA_PLATFORM.zip" ${BALLERINA_PLATFORM}
     createPackInstallationDirectory
     buildPackage
     buildProduct ballerina-platform-macos-installer-x64-${BALLERINA_VERSION}.pkg
+    signProduct ballerina-platform-macos-installer-x64-${BALLERINA_VERSION}.pkg
 }
 
 function createBallerinaRuntime() {
@@ -144,6 +156,7 @@ function createBallerinaRuntime() {
     createPackInstallationDirectory
     buildPackage
     buildProduct ballerina-runtime-macos-installer-x64-${BALLERINA_VERSION}.pkg
+    signProduct ballerina-runtime-macos-installer-x64-${BALLERINA_VERSION}.pkg
 }
 
 deleteTargetDirectory
