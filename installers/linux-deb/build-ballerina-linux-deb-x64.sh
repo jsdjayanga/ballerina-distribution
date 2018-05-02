@@ -83,10 +83,10 @@ function extractPack() {
 }
 
 function createPackInstallationDirectory() {
-    rm -rf target/${BALLERINA_INSTALL_DIRECTORY}/opt/ballerina
-    mkdir -p target/${BALLERINA_INSTALL_DIRECTORY}/opt/ballerina
-    chmod -R 755 target/${BALLERINA_INSTALL_DIRECTORY}/opt/ballerina
-    mv target/original/${BALLERINA_INSTALL_DIRECTORY} target/${BALLERINA_INSTALL_DIRECTORY}/opt/ballerina
+    rm -rf target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
+    mkdir -p target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
+    chmod -R 755 target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
+    mv target/original/${BALLERINA_INSTALL_DIRECTORY} target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
 }
 
 function copyDebianDirectory() {
