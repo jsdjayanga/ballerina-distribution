@@ -87,6 +87,13 @@ function createPackInstallationDirectory() {
     mkdir -p target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
     chmod -R 755 target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
     mv target/original/${BALLERINA_INSTALL_DIRECTORY} target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina
+
+    rm -rf target/${BALLERINA_INSTALL_DIRECTORY}/usr/share/doc/${BALLERINA_INSTALL_DIRECTORY}
+    mkdir -p target/${BALLERINA_INSTALL_DIRECTORY}/usr/share/doc/${BALLERINA_INSTALL_DIRECTORY}
+    chmod -R 755 target/${BALLERINA_INSTALL_DIRECTORY}/usr/share/doc/${BALLERINA_INSTALL_DIRECTORY}
+    cp target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina/${BALLERINA_INSTALL_DIRECTORY}/COPYRIGHT target/${BALLERINA_INSTALL_DIRECTORY}/usr/share/doc/${BALLERINA_INSTALL_DIRECTORY}/copyright
+    cp target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina/${BALLERINA_INSTALL_DIRECTORY}/README target/${BALLERINA_INSTALL_DIRECTORY}/usr/share/doc/${BALLERINA_INSTALL_DIRECTORY}/README
+    cp target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina/${BALLERINA_INSTALL_DIRECTORY}/LICENSE target/${BALLERINA_INSTALL_DIRECTORY}/usr/share/doc/${BALLERINA_INSTALL_DIRECTORY}/LICENSE
 }
 
 function copyDebianDirectory() {
@@ -94,6 +101,7 @@ function copyDebianDirectory() {
     sed -i -e 's/__BALLERINA_VERSION__/'${BALLERINA_VERSION}'/g' target/${BALLERINA_INSTALL_DIRECTORY}/DEBIAN/postinst
     sed -i -e 's/__BALLERINA_VERSION__/'${BALLERINA_VERSION}'/g' target/${BALLERINA_INSTALL_DIRECTORY}/DEBIAN/postrm
     sed -i -e 's/__BALLERINA_VERSION__/'${BALLERINA_VERSION}'/g' target/${BALLERINA_INSTALL_DIRECTORY}/DEBIAN/control
+    cp target/${BALLERINA_INSTALL_DIRECTORY}/usr/lib/ballerina/${BALLERINA_INSTALL_DIRECTORY}/COPYRIGHT target/${BALLERINA_INSTALL_DIRECTORY}/DEBIAN/copyright
 }
 
 function createBallerinaPlatform() {
